@@ -1,44 +1,24 @@
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
+import express from "express";
+import cors from "cors";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 
-// Import middlewares
-const errorHandler = require('./middlewares/errorHandler');
-const { generalLimiter } = require('./middlewares/rateLimitMiddleware');
-
-// Import routes
-const authRoutes = require('./routes/auth');
-const qrcodeRoutes = require('./routes/qrcode');
-const apikeyRoutes = require('./routes/apikey');
-
-// Load environment variables
 dotenv.config();
 
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
-app.use(generalLimiter);
+app.use(express.json());
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/qrcode', qrcodeRoutes);
-app.use('/api/apikey', apikeyRoutes);
-
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+// Test route
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to Qrious API 🚀" });
 });
 
-// Error handling middleware
-app.use(errorHandler);
+// Connect MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch(err => console.error("❌ MongoDB error:", err));
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
-module.exports = app;
+export default app;
