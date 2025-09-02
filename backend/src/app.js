@@ -17,8 +17,18 @@ app.get("/", (req, res) => {
 });
 
 // Connect MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch(err => console.error("❌ MongoDB error:", err));
+if (process.env.MONGODB_URI) {
+  mongoose
+    .connect(process.env.MONGODB_URI)
+    .then(() => console.log("✅ MongoDB connected"))
+    .catch((err) => {
+      console.error("❌ MongoDB error:", err.message);
+      console.log(
+        "💡 Make sure MongoDB is running or update MONGODB_URI in .env"
+      );
+    });
+} else {
+  console.log("⚠️  No MONGODB_URI found in .env file");
+}
 
 export default app;
