@@ -1,54 +1,59 @@
-const ApiKey = require('../models/ApiKey');
-const crypto = require('crypto');
+import ApiKey from "../models/ApiKey.js";
+import { generateApiKey } from "../utils/generateKey.js";
 
-const apikeyController = {
-  async generateApiKey(req, res) {
-    try {
-      const { name } = req.body;
-      const userId = req.user.userId;
+// Generate API Key
+export const createApiKey = async (req, res) => {
+  try {
+    const userId = req.user.id; // comes from JWT middleware
 
-      // Generate API key
-      const key = crypto.randomBytes(32).toString('hex');
-      
-      const apiKey = new ApiKey({
-        name,
-        key,
-        userId
-      });
+    const key = generateApiKey();
+    const apiKey = new ApiKey({
+      key,
+      ownerId: userId,
+      quota: 10
+    });
 
-      await apiKey.save();
-      
-      res.status(201).json(apiKey);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
+    await apiKey.save();
 
-  async getApiKeys(req, res) {
-    try {
-      const apiKeys = await ApiKey.find({ userId: req.user.userId }).select('-key');
-      res.json(apiKeys);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
+    res.status(201).json({
+      message: "API Key generated",
+      apiKey: apiKey.key,
+      expiresAt: apiKey.expiresAt
+    });
 
-  async deleteApiKey(req, res) {
-    try {
-      const apiKey = await ApiKey.findOneAndDelete({
-        _id: req.params.id,
-        userId: req.user.userId
-      });
-      
-      if (!apiKey) {
-        return res.status(404).json({ error: 'API Key not found' });
-      }
-      
-      res.json({ message: 'API Key deleted successfully' });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-module.exports = apikeyController;
+// Get all API keys of user
+export const getApiKeys = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const keys = await ApiKey.find({ ownerId: userId });
+    res.json(keys);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Revoke API key
+export const revokeApiKey = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const apiKey = await ApiKey.findById(id);
+
+    if (!apiKey) return res.status(404).json({ error: "API Key not found" });
+    if (String(apiKey.ownerId) !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    apiKey.status = "revoked";
+    await apiKey.save();
+
+    res.json({ message: "API Key revoked" });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
