@@ -1,38 +1,37 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
-const qrCodeSchema = new mongoose.Schema({
-  name: {
+const apiKeySchema = new mongoose.Schema({
+  key: {
     type: String,
     required: true,
-    trim: true,
-    maxlength: 100
+    unique: true
   },
-  data: {
-    type: String,
-    required: true
-  },
-  qrCodeImage: {
-    type: String,
-    required: true
-  },
-  userId: {
+  ownerId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true
+  },
+  quota: {
+    type: Number,
+    default: 1000 // monthly limit
+  },
+  used: {
+    type: Number,
+    default: 0
+  },
+  expiresAt: {
+    type: Date,
+    default: () => new Date(+new Date() + 30*24*60*60*1000) // 30 days from creation
+  },
+  status: {
+    type: String,
+    enum: ["active", "revoked"],
+    default: "active"
   },
   createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
     type: Date,
     default: Date.now
   }
 });
 
-qrCodeSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
-
-module.exports = mongoose.model('QrCode', qrCodeSchema);
+export default mongoose.model("ApiKey", apiKeySchema);
