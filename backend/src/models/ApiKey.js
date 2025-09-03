@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const apiKeySchema = new mongoose.Schema({
   name: {
@@ -40,4 +40,4 @@ apiKeySchema.pre('save', function(next) {
   next();
 });
 
-module.exports = mongoose.model('ApiKey', apiKeySchema);
+export default mongoose.model('ApiKey', apiKeySchema);

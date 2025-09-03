@@ -8,9 +8,9 @@ export const createApiKey = async (req, res) => {
 
     const key = generateApiKey();
     const apiKey = new ApiKey({
+      name: req.body.name || 'Default API Key',
       key,
-      ownerId: userId,
-      quota: 10
+      userId: userId
     });
 
     await apiKey.save();
@@ -30,7 +30,7 @@ export const createApiKey = async (req, res) => {
 export const getApiKeys = async (req, res) => {
   try {
     const userId = req.user.id;
-    const keys = await ApiKey.find({ ownerId: userId });
+    const keys = await ApiKey.find({ userId: userId });
     res.json(keys);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -44,11 +44,11 @@ export const revokeApiKey = async (req, res) => {
     const apiKey = await ApiKey.findById(id);
 
     if (!apiKey) return res.status(404).json({ error: "API Key not found" });
-    if (String(apiKey.ownerId) !== req.user.id) {
+    if (String(apiKey.userId) !== req.user.id) {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    apiKey.status = "revoked";
+    apiKey.isActive = false;
     await apiKey.save();
 
     res.json({ message: "API Key revoked" });

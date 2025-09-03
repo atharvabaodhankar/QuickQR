@@ -1,11 +1,12 @@
-const express = require('express');
+import express from "express";
+import { createApiKey, getApiKeys, revokeApiKey } from "../controllers/apikeyController.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
+
 const router = express.Router();
-const apikeyController = require('../controllers/apikeyController');
-const authMiddleware = require('../middlewares/authMiddleware');
 
-// API Key routes
-router.post('/generate', authMiddleware.authenticate, apikeyController.generateApiKey);
-router.get('/', authMiddleware.authenticate, apikeyController.getApiKeys);
-router.delete('/:id', authMiddleware.authenticate, apikeyController.deleteApiKey);
+// Protected by JWT
+router.post("/generate", authMiddleware, createApiKey);
+router.get("/", authMiddleware, getApiKeys);
+router.post("/revoke/:id", authMiddleware, revokeApiKey);
 
-module.exports = router;
+export default router;
