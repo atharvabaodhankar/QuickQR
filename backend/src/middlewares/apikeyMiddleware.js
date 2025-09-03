@@ -5,18 +5,12 @@ export const apiKeyAuth = async (req, res, next) => {
     const key = req.header("x-api-key");
     if (!key) return res.status(401).json({ error: "API key required" });
 
-    const apiKey = await ApiKey.findOne({ key, status: "active" });
+    const apiKey = await ApiKey.findOne({ key, isActive: true });
     if (!apiKey) return res.status(403).json({ error: "Invalid or revoked API key" });
 
-    // Check expiry
-    if (new Date() > apiKey.expiresAt) {
-      return res.status(403).json({ error: "API key expired" });
-    }
-
-    // Check quota
-    if (apiKey.used >= apiKey.quota) {
-      return res.status(429).json({ error: "API key quota exceeded" });
-    }
+    // Update last used timestamp
+    apiKey.lastUsed = new Date();
+    await apiKey.save();
 
     // Attach key info to request
     req.apiKey = apiKey;
