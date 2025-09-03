@@ -17,8 +17,13 @@ export const createApiKey = async (req, res) => {
 
     res.status(201).json({
       message: "API Key generated",
-      apiKey: apiKey.key,
-      expiresAt: apiKey.expiresAt
+      apiKey: {
+        id: apiKey._id,
+        name: apiKey.name,
+        key: apiKey.key,
+        isActive: apiKey.isActive,
+        createdAt: apiKey.createdAt
+      }
     });
 
   } catch (err) {
