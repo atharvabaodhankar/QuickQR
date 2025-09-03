@@ -1,29 +1,28 @@
-const ApiKey = require('../models/ApiKey');
+import ApiKey from "../models/ApiKey.js";
 
-const apikeyMiddleware = {
-  async validateApiKey(req, res, next) {
-    try {
-      const apiKey = req.header('X-API-Key');
-      
-      if (!apiKey) {
-        return res.status(401).json({ error: 'API key required' });
-      }
+export const apiKeyAuth = async (req, res, next) => {
+  try {
+    const key = req.header("x-api-key");
+    if (!key) return res.status(401).json({ error: "API key required" });
 
-      const validKey = await ApiKey.findOne({ key: apiKey, isActive: true });
-      if (!validKey) {
-        return res.status(401).json({ error: 'Invalid API key' });
-      }
+    const apiKey = await ApiKey.findOne({ key, status: "active" });
+    if (!apiKey) return res.status(403).json({ error: "Invalid or revoked API key" });
 
-      // Update last used timestamp
-      validKey.lastUsed = new Date();
-      await validKey.save();
-
-      req.apiKey = validKey;
-      next();
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+    // Check expiry
+    if (new Date() > apiKey.expiresAt) {
+      return res.status(403).json({ error: "API key expired" });
     }
+
+    // Check quota
+    if (apiKey.used >= apiKey.quota) {
+      return res.status(429).json({ error: "API key quota exceeded" });
+    }
+
+    // Attach key info to request
+    req.apiKey = apiKey;
+    next();
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
-
-module.exports = apikeyMiddleware;
