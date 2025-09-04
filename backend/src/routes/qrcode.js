@@ -174,4 +174,147 @@ router.get("/qrcode/jwt", authMiddleware, jwtRateLimit, async (req, res) => {
   }
 });
 
+// Get user's QR codes (JWT protected)
+router.get("/qrcodes", authMiddleware, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
+    const userId = req.user.id;
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
+
+    const [qrCodes, total] = await Promise.all([
+      QrCodeModel.find({ userId })
+        .sort(sort)
+        .skip(skip)
+        .limit(parseInt(limit))
+        .select('-qrCodeImage'), // Exclude base64 data for list view
+      QrCodeModel.countDocuments({ userId })
+    ]);
+
+    res.json({
+      qrCodes,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get specific QR code by ID (JWT protected)
+router.get("/qrcodes/:id", authMiddleware, async (req, res) => {
+  try {
+    const qrCode = await QrCodeModel.findOne({ 
+      _id: req.params.id, 
+      userId: req.user.id 
+    });
+
+    if (!qrCode) {
+      return res.status(404).json({ error: "QR Code not found" });
+    }
+
+    // Update access count
+    qrCode.accessCount += 1;
+    qrCode.lastAccessed = new Date();
+    await qrCode.save();
+
+    res.json({
+      qrCode: {
+        id: qrCode._id,
+        name: qrCode.name,
+        url: qrCode.data,
+        qrData: qrCode.qrCodeImage,
+        generatedVia: qrCode.generatedVia,
+        accessCount: qrCode.accessCount,
+        lastAccessed: qrCode.lastAccessed,
+        createdAt: qrCode.createdAt,
+        updatedAt: qrCode.updatedAt
+      }
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete QR code (JWT protected)
+router.delete("/qrcodes/:id", authMiddleware, async (req, res) => {
+  try {
+    const qrCode = await QrCodeModel.findOneAndDelete({ 
+      _id: req.params.id, 
+      userId: req.user.id 
+    });
+
+    if (!qrCode) {
+      return res.status(404).json({ error: "QR Code not found" });
+    }
+
+    res.json({ 
+      message: "QR Code deleted successfully",
+      deletedQrCode: {
+        id: qrCode._id,
+        name: qrCode.name,
+        url: qrCode.data
+      }
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get QR code analytics (JWT protected)
+router.get("/analytics/qrcodes", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { days = 30 } = req.query;
+    
+    const daysAgo = new Date();
+    daysAgo.setDate(daysAgo.getDate() - parseInt(days));
+
+    const [
+      totalQrCodes,
+      recentQrCodes,
+      totalAccesses,
+      byGeneratedVia,
+      topQrCodes
+    ] = await Promise.all([
+      QrCodeModel.countDocuments({ userId }),
+      QrCodeModel.countDocuments({ userId, createdAt: { $gte: daysAgo } }),
+      QrCodeModel.aggregate([
+        { $match: { userId: userId } },
+        { $group: { _id: null, totalAccesses: { $sum: "$accessCount" } } }
+      ]),
+      QrCodeModel.aggregate([
+        { $match: { userId: userId } },
+        { $group: { _id: "$generatedVia", count: { $sum: 1 } } }
+      ]),
+      QrCodeModel.find({ userId })
+        .sort({ accessCount: -1 })
+        .limit(5)
+        .select('name data accessCount createdAt')
+    ]);
+
+    res.json({
+      analytics: {
+        totalQrCodes,
+        recentQrCodes: recentQrCodes,
+        totalAccesses: totalAccesses[0]?.totalAccesses || 0,
+        generationMethods: byGeneratedVia,
+        topQrCodes,
+        period: `Last ${days} days`
+      }
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
