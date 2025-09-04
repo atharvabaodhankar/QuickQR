@@ -1,37 +1,61 @@
 import mongoose from "mongoose";
 
-const apiKeySchema = new mongoose.Schema({
-  key: {
+const qrCodeSchema = new mongoose.Schema({
+  name: {
     type: String,
     required: true,
-    unique: true
+    trim: true,
+    maxlength: 100
   },
-  ownerId: {
+  data: {
+    type: String,
+    required: true,
+    maxlength: 2048 // URL length limit
+  },
+  qrCodeImage: {
+    type: String,
+    required: true // base64 encoded image
+  },
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true
   },
-  quota: {
-    type: Number,
-    default: 1000 // monthly limit
+  apiKeyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ApiKey",
+    required: false // Only set when generated via API key
   },
-  used: {
+  generatedVia: {
+    type: String,
+    enum: ["jwt", "apikey"],
+    required: true
+  },
+  accessCount: {
     type: Number,
     default: 0
   },
-  expiresAt: {
+  lastAccessed: {
     type: Date,
-    default: () => new Date(+new Date() + 30*24*60*60*1000) // 30 days from creation
-  },
-  status: {
-    type: String,
-    enum: ["active", "revoked"],
-    default: "active"
+    default: null
   },
   createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
     type: Date,
     default: Date.now
   }
 });
 
-export default mongoose.model("ApiKey", apiKeySchema);
+qrCodeSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
+
+// Index for efficient queries
+qrCodeSchema.index({ userId: 1, createdAt: -1 });
+qrCodeSchema.index({ data: 1 }); // For caching duplicate URLs
+
+export default mongoose.model("QrCode", qrCodeSchema);
