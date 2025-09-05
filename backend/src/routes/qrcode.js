@@ -56,7 +56,7 @@ router.get("/qrcode", apiKeyAuth, apiKeyRateLimit, async (req, res) => {
     }
 
     // Generate new QR code
-    const qrData = QRCode.toDataURL(url);
+    const qrData = await QRCode.toDataURL(url);
 
     // Save to database
     const qrCode = new QrCodeModel({
@@ -136,7 +136,7 @@ router.get("/qrcode/jwt", authMiddleware, jwtRateLimit, async (req, res) => {
     }
 
     // Generate new QR code
-    const qrData = QRCode.toDataURL(url);
+    const qrData = await QRCode.toDataURL(url);
 
     // Save to database
     const qrCode = new QrCodeModel({
