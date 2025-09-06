@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { 
@@ -162,19 +162,16 @@ const ApiKeys = () => {
                 Use your API keys to generate QR codes programmatically. Each API key has rate limits:
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-                <div className="bg-white rounded-lg p-3">
-                  <div className="font-medium text-gray-900">Hourly Limit</div>
-                  <div className="text-gray-600">100 requests</div>
-                </div>
-                <div className="bg-white rounded-lg p-3">
-                  <div className="font-medium text-gray-900">Daily Limit</div>
-                  <div className="text-gray-600">1,000 requests</div>
-                </div>
-                <div className="bg-white rounded-lg p-3">
-                  <div className="font-medium text-gray-900">Monthly Limit</div>
-                  <div className="text-gray-600">10,000 requests</div>
-                </div>
-              </div>
+                {[
+                  { label: 'Hourly Limit', value: '100 requests' },
+                  { label: 'Daily Limit', value: '1,000 requests' },
+                  { label: 'Monthly Limit', value: '10,000 requests' }
+                ].map((limit, index) => (
+                  <div key={index} className="bg-white rounded-lg p-3">
+                    <div className="font-medium text-gray-900">{limit.label}</div>
+                    <div className="text-gray-600">{limit.value}</div>
+                  </div>
+                ))}</div>
               <div className="mt-4 p-3 bg-white rounded-lg">
                 <code className="text-sm text-gray-800">
                   GET http://localhost:5000/qrcode?url=https://example.com
@@ -210,15 +207,15 @@ const ApiKeys = () => {
                             </div>
                             <div className="flex items-center">
                               {apiKey.isActive ? (
-                                <>
+                                <React.Fragment key="active">
                                   <CheckCircle className="h-4 w-4 mr-1 text-green-500" />
                                   Active
-                                </>
+                                </React.Fragment>
                               ) : (
-                                <>
+                                <React.Fragment key="inactive">
                                   <AlertCircle className="h-4 w-4 mr-1 text-red-500" />
                                   Inactive
-                                </>
+                                </React.Fragment>
                               )}
                             </div>
                           </div>
