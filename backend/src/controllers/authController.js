@@ -25,7 +25,26 @@ export const register = async (req, res) => {
 
     await user.save();
 
-    res.status(201).json({ message: "User registered successfully" });
+    // Generate token for immediate login
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // Return user data without password hash
+    const userData = {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role
+    };
+
+    res.status(201).json({ 
+      message: "User registered successfully",
+      token,
+      user: userData
+    });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -49,7 +68,15 @@ export const login = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.json({ token });
+    // Return user data without password hash
+    const userData = {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role
+    };
+
+    res.json({ token, user: userData });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
