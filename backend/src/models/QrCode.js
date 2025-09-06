@@ -16,6 +16,35 @@ const qrCodeSchema = new mongoose.Schema({
     type: String,
     required: true // base64 encoded image
   },
+  customization: {
+    size: {
+      type: Number,
+      default: 200,
+      min: 100,
+      max: 1000
+    },
+    foregroundColor: {
+      type: String,
+      default: '#000000',
+      match: /^#[0-9A-F]{6}$/i
+    },
+    backgroundColor: {
+      type: String,
+      default: '#FFFFFF',
+      match: /^#[0-9A-F]{6}$/i
+    },
+    errorCorrectionLevel: {
+      type: String,
+      enum: ['L', 'M', 'Q', 'H'],
+      default: 'M'
+    },
+    margin: {
+      type: Number,
+      default: 4,
+      min: 0,
+      max: 20
+    }
+  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
