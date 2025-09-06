@@ -170,6 +170,58 @@ router.post("/qrcode/generate", authMiddleware, jwtRateLimit, async (req, res) =
   }
 });
 
+// Preview QR Code (no database save) - JWT protected
+router.post("/qrcode/preview", authMiddleware, async (req, res) => {
+  try {
+    const { 
+      url, 
+      customization = {}
+    } = req.body;
+
+    if (!url) {
+      return res.status(400).json({ error: "URL is required" });
+    }
+
+    // Validate URL length
+    if (url.length > 2048) {
+      return res.status(400).json({ error: "URL too long (max 2048 characters)" });
+    }
+
+    // Set default customization options
+    const qrOptions = {
+      width: customization.size || 200,
+      margin: customization.margin || 4,
+      color: {
+        dark: customization.foregroundColor || '#000000',
+        light: customization.backgroundColor || '#FFFFFF'
+      },
+      errorCorrectionLevel: customization.errorCorrectionLevel || 'M'
+    };
+
+    // Generate QR code with customization (no database save)
+    const qrData = await QRCode.toDataURL(url, qrOptions);
+
+    res.json({
+      message: "QR Code preview generated",
+      qrCode: {
+        url: url,
+        qrData: qrData,
+        customization: {
+          size: qrOptions.width,
+          foregroundColor: qrOptions.color.dark,
+          backgroundColor: qrOptions.color.light,
+          errorCorrectionLevel: qrOptions.errorCorrectionLevel,
+          margin: qrOptions.margin
+        },
+        isPreview: true
+      }
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Legacy endpoint for backward compatibility
 router.get("/qrcode/jwt", authMiddleware, jwtRateLimit, async (req, res) => {
   try {

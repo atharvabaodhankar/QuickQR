@@ -65,15 +65,19 @@ const QRGenerator = () => {
     }
 
     try {
-      const response = await axios.post("/qrcode/generate", {
+      const response = await axios.post("/qrcode/preview", {
         url: formData.url,
-        name: formData.name || "Preview",
         customization,
       });
 
-      setQrResult({ ...response.data.qrCode, isPreview: true });
+      setQrResult({ 
+        ...response.data.qrCode, 
+        name: formData.name || "Preview",
+        isPreview: true 
+      });
     } catch (error) {
       // Silently fail for preview
+      console.error("Preview failed:", error);
     }
   };
 
@@ -529,9 +533,15 @@ const QRGenerator = () => {
                     />
                   </div>
                   {qrResult.isPreview && (
-                    <p className="mt-2 text-sm text-orange-600 font-medium">
-                      Preview Mode - Not Saved
-                    </p>
+                    <div className="mt-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-md">
+                      <p className="text-sm text-orange-800 font-medium flex items-center">
+                        <Eye className="h-4 w-4 mr-2" />
+                        Preview Mode - Not Saved to Database
+                      </p>
+                      <p className="text-xs text-orange-600 mt-1">
+                        Click "Generate & Save" to store this QR code
+                      </p>
+                    </div>
                   )}
                 </div>
 
@@ -628,22 +638,44 @@ const QRGenerator = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex space-x-3">
-                  <button
-                    onClick={handleDownload}
-                    className="flex-1 flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download
-                  </button>
+                <div className="space-y-3">
+                  {qrResult.isPreview && (
+                    <button
+                      onClick={handleSubmit}
+                      disabled={loading}
+                      className="w-full flex justify-center items-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    >
+                      {loading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <QrCode className="h-4 w-4 mr-2" />
+                          Save This QR Code
+                        </>
+                      )}
+                    </button>
+                  )}
+                  
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={handleDownload}
+                      className="flex-1 flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </button>
 
-                  <button
-                    onClick={handleCopyImage}
-                    className="flex-1 flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copy Image
-                  </button>
+                    <button
+                      onClick={handleCopyImage}
+                      className="flex-1 flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy Image
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : (
