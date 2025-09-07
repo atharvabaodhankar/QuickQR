@@ -39,8 +39,8 @@ const ApiDocs = () => {
             <div className="space-y-2">
               <a href="#examples" className="block text-blue-600 hover:text-blue-800">5. Code Examples</a>
               <a href="#errors" className="block text-blue-600 hover:text-blue-800">6. Error Handling</a>
-              <a href="#best-practices" className="block text-blue-600 hover:text-blue-800">7. Best Practices</a>
-              <a href="#sdks" className="block text-blue-600 hover:text-blue-800">8. SDKs & Libraries</a>
+              <a href="#displaying-qr" className="block text-blue-600 hover:text-blue-800">7. Displaying QR Codes</a>
+              <a href="#best-practices" className="block text-blue-600 hover:text-blue-800">8. Best Practices</a>
             </div>
           </div>
         </div>
@@ -380,9 +380,459 @@ const ApiDocs = () => {
           </div>
         </section>
 
+        {/* Displaying QR Codes */}
+        <section id="displaying-qr" className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">7. Displaying QR Codes</h2>
+          
+          <p className="text-gray-600 mb-6">
+            The API returns QR codes as base64-encoded PNG images in the <code className="text-blue-600">qrData</code> field. 
+            This format can be used directly in HTML, mobile apps, emails, and more.
+          </p>
+
+          <div className="space-y-8">
+            {/* Basic Display */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic HTML Display</h3>
+              <p className="text-gray-600 mb-4">
+                The simplest way to display a QR code is using an HTML img tag:
+              </p>
+              <div className="bg-gray-900 text-gray-100 rounded-lg p-4 mb-4">
+                <pre className="text-sm">
+{`<!-- Direct usage - no processing needed -->
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..." 
+     alt="QR Code" 
+     width="200" 
+     height="200" />
+
+<!-- From API response -->
+<img src="{response.data.qrCode.qrData}" 
+     alt="{response.data.qrCode.name}" 
+     className="w-48 h-48" />`}
+                </pre>
+              </div>
+            </div>
+
+            {/* React/JavaScript */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">React/JavaScript</h3>
+              <div className="bg-gray-900 text-gray-100 rounded-lg p-4 mb-4">
+                <pre className="text-sm">
+{`// React Component
+function QRCodeDisplay({ qrCode }) {
+  return (
+    <div className="text-center">
+      <img 
+        src={qrCode.qrData} 
+        alt={qrCode.name}
+        className="w-48 h-48 mx-auto border rounded-lg"
+      />
+      <p className="mt-2 text-sm text-gray-600">{qrCode.name}</p>
+      <p className="text-xs text-gray-500">{qrCode.url}</p>
+    </div>
+  );
+}
+
+// Usage
+const qrCode = response.data.qrCode;
+<QRCodeDisplay qrCode={qrCode} />`}
+                </pre>
+              </div>
+            </div>
+
+            {/* Download Functionality */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Download as File</h3>
+              <div className="bg-gray-900 text-gray-100 rounded-lg p-4 mb-4">
+                <pre className="text-sm">
+{`// JavaScript - Download QR code as PNG file
+function downloadQRCode(qrData, filename) {
+  const link = document.createElement('a');
+  link.href = qrData;
+  link.download = filename + '.png';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Usage
+downloadQRCode(response.data.qrCode.qrData, 'my-qr-code');
+
+// React with toast notification
+const handleDownload = () => {
+  const link = document.createElement('a');
+  link.href = qrCode.qrData;
+  link.download = \`\${qrCode.name || 'qr-code'}.png\`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  toast.success('QR Code downloaded!');
+};`}
+                </pre>
+              </div>
+            </div>
+
+            {/* Copy to Clipboard */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Copy to Clipboard</h3>
+              <div className="bg-gray-900 text-gray-100 rounded-lg p-4 mb-4">
+                <pre className="text-sm">
+{`// Copy QR code image to clipboard
+async function copyQRToClipboard(qrData) {
+  try {
+    // Convert base64 to blob
+    const response = await fetch(qrData);
+    const blob = await response.blob();
+    
+    // Copy to clipboard
+    await navigator.clipboard.write([
+      new ClipboardItem({ 'image/png': blob })
+    ]);
+    
+    console.log('QR Code copied to clipboard!');
+  } catch (error) {
+    console.error('Failed to copy QR code:', error);
+  }
+}
+
+// Usage
+copyQRToClipboard(response.data.qrCode.qrData);`}
+                </pre>
+              </div>
+            </div>
+
+            {/* Server-Side Usage */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Server-Side Processing</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Node.js</h4>
+                  <div className="bg-gray-900 text-gray-100 rounded-lg p-4">
+                    <pre className="text-sm">
+{`const fs = require('fs');
+
+// Save QR code to file
+function saveQRCode(qrData, filename) {
+  // Remove data URL prefix
+  const base64Data = qrData.replace(/^data:image\\/png;base64,/, '');
+  
+  // Write to file
+  fs.writeFileSync(\`\${filename}.png\`, base64Data, 'base64');
+  console.log(\`QR code saved as \${filename}.png\`);
+}
+
+// Usage
+const response = await axios.get('/qrcode', {
+  params: { url: 'https://example.com' },
+  headers: { 'x-api-key': 'your_api_key' }
+});
+
+saveQRCode(response.data.qrCode.qrData, 'my-qr-code');`}
+                    </pre>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Python</h4>
+                  <div className="bg-gray-900 text-gray-100 rounded-lg p-4">
+                    <pre className="text-sm">
+{`import base64
+import requests
+from PIL import Image
+from io import BytesIO
+
+# Generate QR code
+response = requests.get(
+    'http://localhost:5000/qrcode',
+    params={'url': 'https://example.com'},
+    headers={'x-api-key': 'your_api_key'}
+)
+
+qr_data = response.json()['qrCode']['qrData']
+
+# Method 1: Save to file
+def save_qr_code(qr_data, filename):
+    base64_data = qr_data.split(',')[1]
+    with open(f"{filename}.png", "wb") as f:
+        f.write(base64.b64decode(base64_data))
+
+# Method 2: Load as PIL Image for processing
+def qr_to_pil_image(qr_data):
+    base64_data = qr_data.split(',')[1]
+    image_data = base64.b64decode(base64_data)
+    return Image.open(BytesIO(image_data))
+
+# Usage
+save_qr_code(qr_data, 'my-qr-code')
+image = qr_to_pil_image(qr_data)
+image.show()  # Display the QR code`}
+                    </pre>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">PHP</h4>
+                  <div className="bg-gray-900 text-gray-100 rounded-lg p-4">
+                    <pre className="text-sm">
+{`<?php
+
+// Generate QR code
+$response = file_get_contents('http://localhost:5000/qrcode?url=https://example.com', false, stream_context_create([
+    'http' => [
+        'header' => 'x-api-key: your_api_key'
+    ]
+]));
+
+$data = json_decode($response, true);
+$qrData = $data['qrCode']['qrData'];
+
+// Save QR code to file
+function saveQRCode($qrData, $filename) {
+    $base64Data = explode(',', $qrData)[1];
+    file_put_contents($filename . '.png', base64_decode($base64Data));
+    echo "QR code saved as {$filename}.png\\n";
+}
+
+// Display in HTML
+function displayQRCode($qrData, $name) {
+    return "<img src='{$qrData}' alt='{$name}' width='200' height='200' />";
+}
+
+// Usage
+saveQRCode($qrData, 'my-qr-code');
+echo displayQRCode($qrData, 'My QR Code');
+
+?>`}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Apps */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Mobile Applications</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">React Native</h4>
+                  <div className="bg-gray-900 text-gray-100 rounded-lg p-4">
+                    <pre className="text-sm">
+{`import React from 'react';
+import { View, Image, Text, TouchableOpacity, Alert } from 'react-native';
+
+const QRCodeDisplay = ({ qrCode }) => {
+  const shareQRCode = () => {
+    // Share functionality
+    Share.share({
+      message: \`Check out this QR code: \${qrCode.url}\`,
+      url: qrCode.qrData,
+    });
+  };
+
+  return (
+    <View style={{ alignItems: 'center', padding: 20 }}>
+      <Image 
+        source={{ uri: qrCode.qrData }} 
+        style={{ width: 200, height: 200, marginBottom: 10 }}
+      />
+      <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{qrCode.name}</Text>
+      <Text style={{ fontSize: 14, color: 'gray' }}>{qrCode.url}</Text>
+      <TouchableOpacity onPress={shareQRCode} style={{ marginTop: 10 }}>
+        <Text style={{ color: 'blue' }}>Share QR Code</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};`}
+                    </pre>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Flutter</h4>
+                  <div className="bg-gray-900 text-gray-100 rounded-lg p-4">
+                    <pre className="text-sm">
+{`import 'dart:convert';
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
+
+class QRCodeDisplay extends StatelessWidget {
+  final Map<String, dynamic> qrCode;
+
+  QRCodeDisplay({required this.qrCode});
+
+  @override
+  Widget build(BuildContext context) {
+    // Convert base64 to bytes
+    String base64String = qrCode['qrData'].split(',')[1];
+    Uint8List bytes = base64Decode(base64String);
+
+    return Column(
+      children: [
+        Image.memory(
+          bytes,
+          width: 200,
+          height: 200,
+        ),
+        SizedBox(height: 10),
+        Text(
+          qrCode['name'],
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        Text(
+          qrCode['url'],
+          style: TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+      ],
+    );
+  }
+}`}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Email Integration */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Email Integration</h3>
+              <p className="text-gray-600 mb-4">
+                QR codes can be embedded directly in HTML emails since they're base64-encoded:
+              </p>
+              <div className="bg-gray-900 text-gray-100 rounded-lg p-4 mb-4">
+                <pre className="text-sm">
+{`<!-- HTML Email Template -->
+<html>
+<body>
+  <h2>Your QR Code is Ready!</h2>
+  <p>Scan this QR code to visit: <strong>{{url}}</strong></p>
+  
+  <div style="text-align: center; margin: 20px 0;">
+    <img src="{{qrData}}" 
+         alt="QR Code for {{url}}" 
+         width="200" 
+         height="200"
+         style="border: 2px solid #ccc; border-radius: 8px;" />
+  </div>
+  
+  <p style="font-size: 12px; color: #666;">
+    QR Code generated on {{createdAt}}
+  </p>
+</body>
+</html>
+
+// Node.js email sending
+const nodemailer = require('nodemailer');
+
+async function sendQRCodeEmail(email, qrCode) {
+  const transporter = nodemailer.createTransporter({
+    // your email config
+  });
+
+  await transporter.sendMail({
+    to: email,
+    subject: 'Your QR Code',
+    html: \`
+      <h2>Your QR Code is Ready!</h2>
+      <div style="text-align: center;">
+        <img src="\${qrCode.qrData}" width="200" height="200" />
+        <p><strong>\${qrCode.name}</strong></p>
+        <p>URL: \${qrCode.url}</p>
+      </div>
+    \`
+  });
+}`}
+                </pre>
+              </div>
+            </div>
+
+            {/* PDF Generation */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">PDF Generation</h3>
+              <div className="bg-gray-900 text-gray-100 rounded-lg p-4 mb-4">
+                <pre className="text-sm">
+{`// JavaScript with jsPDF
+import jsPDF from 'jspdf';
+
+function generateQRPDF(qrCode) {
+  const pdf = new jsPDF();
+  
+  // Add title
+  pdf.setFontSize(20);
+  pdf.text('QR Code Document', 20, 30);
+  
+  // Add QR code info
+  pdf.setFontSize(12);
+  pdf.text(\`Name: \${qrCode.name}\`, 20, 50);
+  pdf.text(\`URL: \${qrCode.url}\`, 20, 60);
+  pdf.text(\`Created: \${new Date(qrCode.createdAt).toLocaleDateString()}\`, 20, 70);
+  
+  // Add QR code image
+  pdf.addImage(qrCode.qrData, 'PNG', 20, 80, 50, 50);
+  
+  // Save PDF
+  pdf.save(\`\${qrCode.name}.pdf\`);
+}
+
+// Python with reportlab
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+import base64
+from io import BytesIO
+
+def generate_qr_pdf(qr_code, filename):
+    c = canvas.Canvas(f"{filename}.pdf", pagesize=letter)
+    
+    # Add text
+    c.drawString(100, 750, f"QR Code: {qr_code['name']}")
+    c.drawString(100, 730, f"URL: {qr_code['url']}")
+    
+    # Add QR code image
+    base64_data = qr_code['qrData'].split(',')[1]
+    image_data = base64.b64decode(base64_data)
+    
+    # Save temporarily and add to PDF
+    with open('temp_qr.png', 'wb') as f:
+        f.write(image_data)
+    
+    c.drawImage('temp_qr.png', 100, 600, width=100, height=100)
+    c.save()`}
+                </pre>
+              </div>
+            </div>
+
+            {/* Best Practices for Display */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4">💡 Display Best Practices</h3>
+              <div className="space-y-3 text-blue-800">
+                <div className="flex items-start">
+                  <span className="font-medium mr-2">Size:</span>
+                  <span>Minimum 100x100px for reliable scanning, 200x200px recommended</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="font-medium mr-2">Contrast:</span>
+                  <span>Ensure high contrast between foreground and background colors</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="font-medium mr-2">Quality:</span>
+                  <span>Don't compress or resize QR codes - use original dimensions</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="font-medium mr-2">Testing:</span>
+                  <span>Test QR codes with multiple devices and scanning apps</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="font-medium mr-2">Accessibility:</span>
+                  <span>Always include alt text and the target URL as text</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Best Practices */}
         <section id="best-practices" className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">7. Best Practices</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">8. Best Practices</h2>
           
           <div className="space-y-6">
             <div>
