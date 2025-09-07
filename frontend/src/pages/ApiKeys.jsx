@@ -366,7 +366,7 @@ print(f"Usage: {data['usage']}")`}
               </div>
             </div>
           </div>
-        }
+        </div>
 
         {/* API Keys List */}
         {apiKeys.length > 0 ? (
@@ -392,12 +392,12 @@ print(f"Usage: {data['usage']}")`}
                             </div>
                             <div className="flex items-center">
                               {apiKey.isActive ? (
-                                <React.Fragment key="active">
+                                <React.Fragment key={`${apiKey.id}-active`}>
                                   <CheckCircle className="h-4 w-4 mr-1 text-green-500" />
                                   Active
                                 </React.Fragment>
                               ) : (
-                                <React.Fragment key="inactive">
+                                <React.Fragment key={`${apiKey.id}-inactive`}>
                                   <AlertCircle className="h-4 w-4 mr-1 text-red-500" />
                                   Inactive
                                 </React.Fragment>
