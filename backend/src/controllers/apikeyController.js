@@ -37,15 +37,51 @@ export const getApiKeys = async (req, res) => {
     const userId = req.user.id;
     const keys = await ApiKey.find({ userId: userId });
     
-    // Format the response to match the create response
-    const formattedKeys = keys.map(key => ({
-      id: key._id,
-      name: key.name,
-      key: key.key,
-      isActive: key.isActive,
-      lastUsed: key.lastUsed,
-      createdAt: key.createdAt,
-      updatedAt: key.updatedAt
+    // Import QrCode model for usage calculations
+    const QrCode = (await import("../models/QrCode.js")).default;
+    
+    // Calculate usage statistics for each API key
+    const formattedKeys = await Promise.all(keys.map(async (key) => {
+      const now = new Date();
+      const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      // Count usage for different time periods
+      const [hourlyCount, dailyCount, monthlyCount] = await Promise.all([
+        QrCode.countDocuments({ 
+          apiKeyId: key._id, 
+          createdAt: { $gte: oneHourAgo } 
+        }),
+        QrCode.countDocuments({ 
+          apiKeyId: key._id, 
+          createdAt: { $gte: oneDayAgo } 
+        }),
+        QrCode.countDocuments({ 
+          apiKeyId: key._id, 
+          createdAt: { $gte: oneMonthAgo } 
+        })
+      ]);
+
+      // Default limits (should match the middleware)
+      const HOURLY_LIMIT = 100;
+      const DAILY_LIMIT = 1000;
+      const MONTHLY_LIMIT = 10000;
+
+      return {
+        id: key._id,
+        name: key.name,
+        key: key.key,
+        isActive: key.isActive,
+        lastUsed: key.lastUsed,
+        createdAt: key.createdAt,
+        updatedAt: key.updatedAt,
+        usage: {
+          hourly: { used: hourlyCount, limit: HOURLY_LIMIT },
+          daily: { used: dailyCount, limit: DAILY_LIMIT },
+          monthly: { used: monthlyCount, limit: MONTHLY_LIMIT }
+        }
+      };
     }));
     
     res.json(formattedKeys);

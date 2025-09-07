@@ -27,11 +27,14 @@ const ApiKeys = () => {
     fetchApiKeys();
   }, []);
 
-  const fetchApiKeys = async () => {
+  const fetchApiKeys = async (showToast = false) => {
     try {
       setLoading(true);
       const response = await axios.get("/apikey");
       setApiKeys(response.data);
+      if (showToast) {
+        toast.success("Usage statistics refreshed!");
+      }
     } catch (error) {
       toast.error("Failed to fetch API keys");
     } finally {
@@ -149,13 +152,23 @@ const ApiKeys = () => {
               Manage your API keys for programmatic access to QR code generation
             </p>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Create API Key
-          </button>
+          <div className="flex space-x-3">
+            <button
+              onClick={() => fetchApiKeys(true)}
+              disabled={loading}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              <Activity className="h-4 w-4 mr-2" />
+              {loading ? "Refreshing..." : "Refresh Usage"}
+            </button>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create API Key
+            </button>
+          </div>
         </div>
 
         {/* API Documentation */}
@@ -202,9 +215,20 @@ Header: x-api-key: your_api_key_here`}
           {apiKeys.length > 0 ? (
             <div className="bg-white shadow rounded-lg">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">
-                  Your API Keys
-                </h2>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-medium text-gray-900">
+                      Your API Keys
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Usage statistics update in real-time. Click "Refresh
+                      Usage" to see latest data.
+                    </p>
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Last updated: {new Date().toLocaleTimeString()}
+                  </div>
+                </div>
               </div>
               <div className="divide-y divide-gray-200">
                 {apiKeys.map((apiKey) => (
