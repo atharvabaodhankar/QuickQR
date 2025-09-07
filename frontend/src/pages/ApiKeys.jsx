@@ -152,36 +152,221 @@ const ApiKeys = () => {
           </button>
         </div>
 
-        {/* API Usage Information */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-          <div className="flex items-start">
-            <Code className="h-6 w-6 text-blue-600 mt-1 mr-3" />
-            <div>
-              <h3 className="text-lg font-medium text-blue-900 mb-2">API Usage</h3>
-              <p className="text-blue-700 mb-4">
-                Use your API keys to generate QR codes programmatically. Each API key has rate limits:
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-                {[
-                  { label: 'Hourly Limit', value: '100 requests' },
-                  { label: 'Daily Limit', value: '1,000 requests' },
-                  { label: 'Monthly Limit', value: '10,000 requests' }
-                ].map((limit, index) => (
-                  <div key={index} className="bg-white rounded-lg p-3">
-                    <div className="font-medium text-gray-900">{limit.label}</div>
-                    <div className="text-gray-600">{limit.value}</div>
-                  </div>
-                ))}</div>
-              <div className="mt-4 p-3 bg-white rounded-lg">
-                <code className="text-sm text-gray-800">
-                  GET http://localhost:5000/qrcode?url=https://example.com
-                  <br />
-                  Header: x-api-key: your_api_key_here
-                </code>
+        {/* API Documentation */}
+        <div className="space-y-8 mb-8">
+          {/* Quick Start */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div className="flex items-start">
+              <Code className="h-6 w-6 text-blue-600 mt-1 mr-3" />
+              <div className="flex-1">
+                <h3 className="text-lg font-medium text-blue-900 mb-2">Quick Start</h3>
+                <p className="text-blue-700 mb-4">
+                  Generate QR codes programmatically using your API key. Each API key has rate limits:
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm mb-4">
+                  {[
+                    { label: 'Hourly Limit', value: '100 requests' },
+                    { label: 'Daily Limit', value: '1,000 requests' },
+                    { label: 'Monthly Limit', value: '10,000 requests' }
+                  ].map((limit, index) => (
+                    <div key={index} className="bg-white rounded-lg p-3">
+                      <div className="font-medium text-gray-900">{limit.label}</div>
+                      <div className="text-gray-600">{limit.value}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-white rounded-lg p-4">
+                  <h4 className="font-medium text-gray-900 mb-2">Basic Usage</h4>
+                  <pre className="text-sm text-gray-800 overflow-x-auto">
+{`GET http://localhost:5000/qrcode?url=https://example.com
+Header: x-api-key: your_api_key_here`}
+                  </pre>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+
+          {/* API Endpoints */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">API Endpoints</h3>
+            
+            {/* Basic QR Generation */}
+            <div className="mb-8">
+              <div className="flex items-center mb-3">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-3">
+                  GET
+                </span>
+                <code className="text-lg font-mono text-gray-900">/qrcode</code>
+              </div>
+              <p className="text-gray-600 mb-4">Generate a QR code with basic options</p>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Query Parameters</h4>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="space-y-2 text-sm">
+                      <div><code className="text-blue-600">url</code> <span className="text-red-500">*required</span> - The URL to encode</div>
+                      <div><code className="text-blue-600">name</code> <span className="text-gray-500">optional</span> - Custom name for the QR code</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Example Response</h4>
+                  <div className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto">
+                    <pre className="text-sm">
+{`{
+  "message": "QR Code generated and saved",
+  "qrCode": {
+    "id": "68b520710dba987a2b7c537f",
+    "name": "QR for https://example.com",
+    "url": "https://example.com",
+    "qrData": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+    "accessCount": 1,
+    "createdAt": "2025-09-01T04:26:25.372Z",
+    "cached": false
+  },
+  "usage": {
+    "hourly": { "used": 1, "limit": 100 },
+    "daily": { "used": 1, "limit": 1000 },
+    "monthly": { "used": 1, "limit": 10000 }
+  }
+}`}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Advanced QR Generation */}
+            <div className="mb-8 border-t pt-8">
+              <div className="flex items-center mb-3">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-3">
+                  POST
+                </span>
+                <code className="text-lg font-mono text-gray-900">/qrcode/generate</code>
+              </div>
+              <p className="text-gray-600 mb-4">Generate a QR code with advanced customization options</p>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Request Body</h4>
+                  <div className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto">
+                    <pre className="text-sm">
+{`{
+  "url": "https://example.com",
+  "name": "Custom QR Code",
+  "customization": {
+    "size": 300,
+    "foregroundColor": "#000000",
+    "backgroundColor": "#FFFFFF",
+    "errorCorrectionLevel": "M",
+    "margin": 4
+  }
+}`}
+                    </pre>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Customization Options</h4>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="space-y-2 text-sm">
+                      <div><code className="text-blue-600">size</code> - QR code size in pixels (100-1000)</div>
+                      <div><code className="text-blue-600">foregroundColor</code> - Hex color for QR code pattern</div>
+                      <div><code className="text-blue-600">backgroundColor</code> - Hex color for background</div>
+                      <div><code className="text-blue-600">errorCorrectionLevel</code> - L, M, Q, or H</div>
+                      <div><code className="text-blue-600">margin</code> - Border margin (0-20)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Code Examples */}
+            <div className="border-t pt-8">
+              <h4 className="font-medium text-gray-900 mb-4">Code Examples</h4>
+              
+              <div className="space-y-6">
+                {/* JavaScript */}
+                <div>
+                  <h5 className="font-medium text-gray-800 mb-3">JavaScript (Node.js)</h5>
+                  <div className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto">
+                    <pre className="text-sm">
+{`const axios = require('axios');
+
+const response = await axios.get('http://localhost:5000/qrcode', {
+  params: { url: 'https://example.com', name: 'My QR' },
+  headers: { 'x-api-key': 'your_api_key_here' }
+});
+
+console.log('QR Code ID:', response.data.qrCode.id);
+console.log('Usage:', response.data.usage);`}
+                    </pre>
+                  </div>
+                </div>
+
+                {/* Python */}
+                <div>
+                  <h5 className="font-medium text-gray-800 mb-3">Python</h5>
+                  <div className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto">
+                    <pre className="text-sm">
+{`import requests
+
+response = requests.get(
+    'http://localhost:5000/qrcode',
+    params={'url': 'https://example.com', 'name': 'My QR'},
+    headers={'x-api-key': 'your_api_key_here'}
+)
+
+data = response.json()
+print(f"QR Code ID: {data['qrCode']['id']}")
+print(f"Usage: {data['usage']}")`}
+                    </pre>
+                  </div>
+                </div>
+
+                {/* cURL */}
+                <div>
+                  <h5 className="font-medium text-gray-800 mb-3">cURL</h5>
+                  <div className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto">
+                    <pre className="text-sm">
+{`curl -X GET "http://localhost:5000/qrcode?url=https://example.com&name=My QR" \\
+  -H "x-api-key: your_api_key_here"`}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Error Responses */}
+            <div className="border-t pt-8">
+              <h4 className="font-medium text-gray-900 mb-4">Common Error Responses</h4>
+              <div className="space-y-4">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <h5 className="font-medium text-red-900 mb-2">Rate Limit Exceeded (429)</h5>
+                  <pre className="text-sm text-red-800">
+{`{
+  "error": "Rate limit exceeded",
+  "details": {
+    "limit": "hourly",
+    "used": 100,
+    "resetTime": "2025-09-01T05:00:00.000Z"
+  }
+}`}
+                  </pre>
+                </div>
+
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <h5 className="font-medium text-red-900 mb-2">Invalid API Key (401)</h5>
+                  <pre className="text-sm text-red-800">
+{`{ "error": "Invalid or missing API key" }`}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
 
         {/* API Keys List */}
         {apiKeys.length > 0 ? (

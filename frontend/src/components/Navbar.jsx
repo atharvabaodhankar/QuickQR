@@ -10,7 +10,8 @@ import {
   LogOut, 
   Menu, 
   X,
-  User
+  User,
+  Book
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -24,6 +25,7 @@ const Navbar = () => {
     { name: 'QR Library', href: '/library', icon: Library },
     { name: 'Analytics', href: '/analytics', icon: BarChart3 },
     { name: 'API Keys', href: '/api-keys', icon: Key },
+    { name: 'API Docs', href: '/docs', icon: Book },
   ];
 
   const isActive = (path) => location.pathname === path;

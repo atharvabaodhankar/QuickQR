@@ -9,6 +9,7 @@ import QRGenerator from './pages/QRGenerator';
 import QRLibrary from './pages/QRLibrary';
 import Analytics from './pages/Analytics';
 import ApiKeys from './pages/ApiKeys';
+import ApiDocs from './pages/ApiDocs';
 import './App.css';
 
 // Protected Route Component
@@ -84,6 +85,11 @@ function AppContent() {
         <Route path="/api-keys" element={
           <ProtectedRoute>
             <ApiKeys />
+          </ProtectedRoute>
+        } />
+        <Route path="/docs" element={
+          <ProtectedRoute>
+            <ApiDocs />
           </ProtectedRoute>
         } />
         
