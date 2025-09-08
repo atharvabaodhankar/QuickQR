@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   Info
 } from 'lucide-react';
+import { getBackendUrl } from '../utils/config';
 
 const ApiDocs = () => {
   const copyToClipboard = (text) => {
@@ -114,7 +115,7 @@ const ApiDocs = () => {
             <h4 className="font-semibold text-gray-900 mb-2">Example Request</h4>
             <div className="bg-gray-900 text-gray-100 rounded-lg p-4 mb-4">
               <pre className="text-sm">
-{`curl -X GET "http://localhost:5000/qrcode?url=https://example.com&name=My Website" \\
+{`curl -X GET "${getBackendUrl()}/qrcode?url=https://example.com&name=My Website" \\
   -H "x-api-key: your_api_key_here"`}
               </pre>
             </div>
@@ -543,7 +544,7 @@ from io import BytesIO
 
 # Generate QR code
 response = requests.get(
-    'http://localhost:5000/qrcode',
+    '${getBackendUrl()}/qrcode',
     params={'url': 'https://example.com'},
     headers={'x-api-key': 'your_api_key'}
 )
@@ -577,7 +578,7 @@ image.show()  # Display the QR code`}
 {`<?php
 
 // Generate QR code
-$response = file_get_contents('http://localhost:5000/qrcode?url=https://example.com', false, stream_context_create([
+$response = file_get_contents('${getBackendUrl()}/qrcode?url=https://example.com', false, stream_context_create([
     'http' => [
         'header' => 'x-api-key: your_api_key'
     ]

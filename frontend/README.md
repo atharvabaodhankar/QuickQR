@@ -1,12 +1,62 @@
-# React + Vite
+# QuickQR Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React frontend for the QuickQR application - a QR code generator with API functionality.
 
-Currently, two official plugins are available:
+## Environment Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Copy the environment example file:
+   ```bash
+   cp .env.example .env
+   ```
 
-## Expanding the ESLint configuration
+2. Update the `.env` file with your backend URL:
+   ```env
+   # For local development
+   VITE_BACKEND_URL=http://localhost:5000
+   
+   # For production
+   VITE_BACKEND_URL=https://your-api-domain.com
+   ```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+## Production Build
+
+```bash
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## Environment Variables
+
+- `VITE_BACKEND_URL`: The URL of your QuickQR backend API
+
+## Features
+
+- User authentication (login/register)
+- QR code generation with customization
+- QR code library management
+- API key management
+- Analytics dashboard
+- Comprehensive API documentation
+
+## Tech Stack
+
+- React 18
+- Vite
+- Tailwind CSS
+- React Router
+- Axios
+- React Hot Toast
+- Lucide React Icons

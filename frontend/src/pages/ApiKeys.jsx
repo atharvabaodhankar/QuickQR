@@ -14,6 +14,7 @@ import {
   CheckCircle,
   Code,
 } from "lucide-react";
+import { getBackendUrl } from "../utils/config";
 
 const ApiKeys = () => {
   const [apiKeys, setApiKeys] = useState([]);
@@ -204,7 +205,7 @@ const ApiKeys = () => {
                     Basic Usage
                   </h4>
                   <pre className="text-sm text-gray-800 overflow-x-auto">
-                    {`GET http://localhost:5000/qrcode?url=https://example.com
+                    {`GET ${getBackendUrl()}/qrcode?url=https://example.com
 Header: x-api-key: your_api_key_here`}
                   </pre>
                 </div>
@@ -627,7 +628,7 @@ Header: x-api-key: your_api_key_here`}
                     <pre className="text-sm">
                       {`const axios = require('axios');
 
-const response = await axios.get('http://localhost:5000/qrcode', {
+const response = await axios.get('${getBackendUrl()}/qrcode', {
   params: { url: 'https://example.com', name: 'My QR' },
   headers: { 'x-api-key': 'your_api_key_here' }
 });
@@ -646,7 +647,7 @@ console.log('Usage:', response.data.usage);`}
                       {`import requests
 
 response = requests.get(
-    'http://localhost:5000/qrcode',
+    '${getBackendUrl()}/qrcode',
     params={'url': 'https://example.com', 'name': 'My QR'},
     headers={'x-api-key': 'your_api_key_here'}
 )
@@ -663,7 +664,7 @@ print(f"Usage: {data['usage']}")`}
                   <h5 className="font-medium text-gray-800 mb-3">cURL</h5>
                   <div className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto">
                     <pre className="text-sm">
-                      {`curl -X GET "http://localhost:5000/qrcode?url=https://example.com&name=My QR" \\
+                      {`curl -X GET "${getBackendUrl()}/qrcode?url=https://example.com&name=My QR" \\
   -H "x-api-key: your_api_key_here"`}
                     </pre>
                   </div>
