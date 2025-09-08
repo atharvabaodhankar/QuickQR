@@ -195,7 +195,11 @@ const QRGenerator = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <QrCode className="mx-auto h-12 w-12 text-blue-600 mb-4" />
+          <img
+                  src="/quickqr.png"
+                  alt="QuickQR Logo"
+                  className="mx-auto h-17 w-17 text-blue-600 mb-4"
+                />
           <h1 className="text-3xl font-bold text-gray-900">
             QR Code Generator
           </h1>
