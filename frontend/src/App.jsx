@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
+import ResponsiveContainer from './components/ResponsiveContainer';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -46,7 +47,7 @@ function AppContent() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <ResponsiveContainer className="min-h-screen bg-gray-50">
       {user && <Navbar />}
       <Routes>
         {/* Public Routes */}
@@ -99,7 +100,7 @@ function AppContent() {
         } />
       </Routes>
       <Toaster position="top-right" />
-    </div>
+    </ResponsiveContainer>
   );
 }
 

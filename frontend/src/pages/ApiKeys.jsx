@@ -146,14 +146,14 @@ const ApiKeys = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">API Keys</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">API Keys</h1>
             <p className="mt-2 text-gray-600">
               Manage your API keys for programmatic access to QR code generation
             </p>
           </div>
-          <div className="flex space-x-3">
+          <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
             <button
               onClick={() => fetchApiKeys(true)}
               disabled={loading}
@@ -264,8 +264,8 @@ Header: x-api-key: your_api_key_here`}
                           </div>
                         </div>
 
-                        <div className="mt-3 flex items-center space-x-2">
-                          <div className="flex-1 font-mono text-sm bg-gray-50 px-3 py-2 rounded border">
+                        <div className="mt-3 flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                          <div className="flex-1 font-mono text-sm bg-gray-50 px-3 py-2 rounded border break-all">
                             {visibleKeys.has(apiKey.id)
                               ? apiKey.key
                               : maskApiKey(apiKey.key)}
@@ -709,8 +709,8 @@ print(f"Usage: {data['usage']}")`}
 
         {/* Create API Key Modal */}
         {showCreateModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white">
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+            <div className="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
               <div className="mt-3">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-medium text-gray-900">
@@ -746,7 +746,7 @@ print(f"Usage: {data['usage']}")`}
                     </p>
                   </div>
 
-                  <div className="flex space-x-3">
+                  <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
                     <button
                       type="button"
                       onClick={() => setShowCreateModal(false)}

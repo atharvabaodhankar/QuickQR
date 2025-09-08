@@ -48,7 +48,7 @@ const Navbar = () => {
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <div className="hidden lg:ml-6 lg:flex lg:space-x-8">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -70,7 +70,7 @@ const Navbar = () => {
           </div>
 
           {/* User Menu */}
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
+          <div className="hidden lg:ml-6 lg:flex lg:items-center">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 text-sm text-gray-700">
                 <User className="h-4 w-4" />
@@ -87,7 +87,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="sm:hidden flex items-center">
+          <div className="lg:hidden flex items-center">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
@@ -104,7 +104,7 @@ const Navbar = () => {
 
       {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div className="sm:hidden">
+        <div className="lg:hidden">
           <div className="pt-2 pb-3 space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon;

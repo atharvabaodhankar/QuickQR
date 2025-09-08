@@ -1,1 +1,53 @@
 @import "tailwindcss";
+
+/* Additional responsive utilities */
+@layer utilities {
+  .text-responsive {
+    @apply text-sm sm:text-base;
+  }
+  
+  .heading-responsive {
+    @apply text-xl sm:text-2xl lg:text-3xl;
+  }
+  
+  .container-responsive {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  .grid-responsive {
+    @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+  
+  .flex-responsive {
+    @apply flex-col sm:flex-row;
+  }
+  
+  .space-responsive {
+    @apply space-y-4 sm:space-y-0 sm:space-x-4;
+  }
+}
+
+/* Ensure proper mobile scrolling */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Fix for mobile viewport issues */
+@media screen and (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Prevent horizontal scroll on mobile */
+  * {
+    max-width: 100%;
+  }
+  
+  /* Better touch targets */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

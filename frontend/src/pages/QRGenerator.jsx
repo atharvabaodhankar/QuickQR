@@ -194,21 +194,21 @@ const QRGenerator = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <img
                   src="/quickqr.png"
                   alt="QuickQR Logo"
-                  className="mx-auto h-17 w-17 text-blue-600 mb-4"
+                  className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-blue-600 mb-4"
                 />
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             QR Code Generator
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-sm sm:text-base text-gray-600">
             Create QR codes instantly for any URL
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
           {/* Form Section */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between mb-6">
@@ -289,7 +289,7 @@ const QRGenerator = () => {
                     </h3>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Size */}
                     <div>
                       <label
@@ -395,7 +395,7 @@ const QRGenerator = () => {
                     </div>
 
                     {/* Error Correction Level */}
-                    <div className="sm:col-span-2">
+                    <div className="md:col-span-2">
                       <label
                         htmlFor="errorCorrectionLevel"
                         className="block text-sm font-medium text-gray-700 mb-2"
@@ -428,7 +428,7 @@ const QRGenerator = () => {
                   type="button"
                   onClick={togglePreview}
                   disabled={!formData.url}
-                  className="flex items-center px-4 py-3 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  className="flex items-center justify-center px-4 py-3 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   {previewMode ? "Stop Preview" : "Preview"}
@@ -663,7 +663,7 @@ const QRGenerator = () => {
                     </button>
                   )}
                   
-                  <div className="flex space-x-3">
+                  <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
                     <button
                       onClick={handleDownload}
                       className="flex-1 flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"

@@ -86,16 +86,16 @@ const Analytics = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
             <p className="mt-2 text-gray-600">
               Track your QR code performance and usage patterns
             </p>
           </div>
           
           {/* Time Range Selector */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-center sm:justify-start space-x-2">
             <Calendar className="h-4 w-4 text-gray-400" />
             <select
               value={timeRange}
@@ -140,7 +140,7 @@ const Analytics = () => {
           })}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
           {/* Generation Methods Chart */}
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center mb-6">
@@ -240,7 +240,7 @@ const Analytics = () => {
             <h2 className="text-lg font-semibold text-gray-900">Usage Insights</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <div className="text-2xl font-bold text-blue-600 mb-2">
                 {analytics?.totalQrCodes > 0 ? 
@@ -270,7 +270,7 @@ const Analytics = () => {
         {analytics && (
           <div className="mt-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow p-6 text-white">
             <h2 className="text-xl font-semibold mb-4">Summary</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div>
                 <p className="text-blue-100 mb-2">Total Performance</p>
                 <p className="text-2xl font-bold">
