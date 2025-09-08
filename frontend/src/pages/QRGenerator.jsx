@@ -100,7 +100,7 @@ const QRGenerator = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("/qrcode/generate", {
+      const response = await axios.post("/qrcode/generate-jwt", {
         url: formData.url,
         name: formData.name,
         customization,

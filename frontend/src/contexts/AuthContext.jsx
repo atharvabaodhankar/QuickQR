@@ -19,6 +19,14 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    delete axios.defaults.headers.common["Authorization"];
+    setUser(null);
+    toast.success("Logged out successfully");
+  };
+
   // Set up axios interceptor for auth token
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -101,14 +109,6 @@ export const AuthProvider = ({ children }) => {
       toast.error(message);
       return { success: false, error: message };
     }
-  };
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    delete axios.defaults.headers.common["Authorization"];
-    setUser(null);
-    toast.success("Logged out successfully");
   };
 
   const value = {
