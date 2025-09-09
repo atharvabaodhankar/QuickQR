@@ -20,8 +20,8 @@ router.get("/scan/:id", async (req, res) => {
 
     // Extract tracking information
     const userAgent = req.get('User-Agent') || 'Unknown';
-    const ipAddress = req.ip || req.connection.remoteAddress || 'Unknown';
-    const referrer = req.get('Referrer') || 'Direct';
+    const ipAddress = req.ip || req.socket.remoteAddress || req.headers['x-forwarded-for'] || 'Unknown';
+    const referrer = req.get('Referrer') || req.get('Referer') || 'Direct';
 
     // Update scan statistics
     qrCode.scanCount += 1;
@@ -111,11 +111,14 @@ router.get("/qrcode", apiKeyAuth, apiKeyRateLimit, async (req, res) => {
       });
     }
 
-    // Save to database first to get the ID
+    // Generate temporary QR code first to satisfy schema requirements
+    const tempQrData = await QRCode.toDataURL(url);
+
+    // Save to database to get the ID
     const qrCode = new QrCodeModel({
       name: qrName,
       data: url,
-      qrCodeImage: '', // Temporary empty string
+      qrCodeImage: tempQrData, // Temporary QR code
       userId: userId,
       apiKeyId: req.apiKey._id,
       generatedVia: "apikey",
@@ -129,7 +132,7 @@ router.get("/qrcode", apiKeyAuth, apiKeyRateLimit, async (req, res) => {
     const trackingUrl = generateTrackingUrl(qrCode._id);
     const qrData = await QRCode.toDataURL(trackingUrl);
 
-    // Update with the actual QR code image
+    // Update with the tracking QR code image
     qrCode.qrCodeImage = qrData;
     await qrCode.save();
 
@@ -184,11 +187,14 @@ router.post("/qrcode/generate", apiKeyAuth, apiKeyRateLimit, async (req, res) =>
       errorCorrectionLevel: customization.errorCorrectionLevel || "M",
     };
 
-    // Save to database first to get the ID
+    // Generate temporary QR code first to satisfy schema requirements
+    const tempQrData = await QRCode.toDataURL(url, qrOptions);
+
+    // Save to database to get the ID
     const qrCode = new QrCodeModel({
       name: qrName,
       data: url,
-      qrCodeImage: '', // Temporary empty string
+      qrCodeImage: tempQrData, // Temporary QR code
       userId: userId,
       apiKeyId: req.apiKey._id,
       generatedVia: "apikey",
@@ -209,7 +215,7 @@ router.post("/qrcode/generate", apiKeyAuth, apiKeyRateLimit, async (req, res) =>
     const trackingUrl = generateTrackingUrl(qrCode._id);
     const qrData = await QRCode.toDataURL(trackingUrl, qrOptions);
 
-    // Update with the actual QR code image
+    // Update with the tracking QR code image
     qrCode.qrCodeImage = qrData;
     await qrCode.save();
 
@@ -269,11 +275,14 @@ router.post(
         errorCorrectionLevel: customization.errorCorrectionLevel || "M",
       };
 
-      // Save to database first to get the ID
+      // Generate temporary QR code first to satisfy schema requirements
+      const tempQrData = await QRCode.toDataURL(url, qrOptions);
+
+      // Save to database to get the ID
       const qrCode = new QrCodeModel({
         name: qrName,
         data: url,
-        qrCodeImage: '', // Temporary empty string
+        qrCodeImage: tempQrData, // Temporary QR code
         userId: userId,
         generatedVia: "jwt",
         customization: {
@@ -293,7 +302,7 @@ router.post(
       const trackingUrl = generateTrackingUrl(qrCode._id);
       const qrData = await QRCode.toDataURL(trackingUrl, qrOptions);
 
-      // Update with the actual QR code image
+      // Update with the tracking QR code image
       qrCode.qrCodeImage = qrData;
       await qrCode.save();
 
@@ -392,11 +401,14 @@ router.get("/qrcode/jwt", authMiddleware, jwtRateLimit, async (req, res) => {
     const qrName =
       name || `QR for ${url.substring(0, 50)}${url.length > 50 ? "..." : ""}`;
 
-    // Save to database first to get the ID
+    // Generate temporary QR code first to satisfy schema requirements
+    const tempQrData = await QRCode.toDataURL(url);
+
+    // Save to database to get the ID
     const qrCode = new QrCodeModel({
       name: qrName,
       data: url,
-      qrCodeImage: '', // Temporary empty string
+      qrCodeImage: tempQrData, // Temporary QR code
       userId: userId,
       generatedVia: "jwt",
       accessCount: 1,
@@ -409,7 +421,7 @@ router.get("/qrcode/jwt", authMiddleware, jwtRateLimit, async (req, res) => {
     const trackingUrl = generateTrackingUrl(qrCode._id);
     const qrData = await QRCode.toDataURL(trackingUrl);
 
-    // Update with the actual QR code image
+    // Update with the tracking QR code image
     qrCode.qrCodeImage = qrData;
     await qrCode.save();
 

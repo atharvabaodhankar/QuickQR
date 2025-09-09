@@ -10,6 +10,9 @@ dotenv.config();
 
 const app = express();
 
+// Trust proxy for proper IP address handling
+app.set('trust proxy', true);
+
 // Middleware
 app.use(cors());
 app.use(express.json());
