@@ -222,9 +222,15 @@ const QRLibrary = () => {
                       </p>
                       
                       <div className="flex items-center justify-between text-xs text-gray-400">
-                        <div className="flex items-center">
-                          <Eye className="h-3 w-3 mr-1" />
-                          {qr.accessCount}
+                        <div className="flex items-center space-x-3">
+                          <div className="flex items-center">
+                            <Eye className="h-3 w-3 mr-1" />
+                            {qr.accessCount}
+                          </div>
+                          <div className="flex items-center">
+                            <QrCode className="h-3 w-3 mr-1" />
+                            {qr.scanCount || 0}
+                          </div>
                         </div>
                         <div className="flex items-center">
                           <Calendar className="h-3 w-3 mr-1" />
@@ -380,8 +386,17 @@ const QRLibrary = () => {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Access Count</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedQr.accessCount}</p>
+                      <label className="block text-sm font-medium text-gray-700">Statistics</label>
+                      <div className="mt-1 grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">Views:</span>
+                          <span className="ml-2 font-medium text-gray-900">{selectedQr.accessCount}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Scans:</span>
+                          <span className="ml-2 font-medium text-blue-600">{selectedQr.scanCount || 0}</span>
+                        </div>
+                      </div>
                     </div>
                     
                     <div>
@@ -389,12 +404,20 @@ const QRLibrary = () => {
                       <p className="mt-1 text-sm text-gray-900">{formatDate(selectedQr.createdAt)}</p>
                     </div>
                     
-                    {selectedQr.lastAccessed && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Last Accessed</label>
-                        <p className="mt-1 text-sm text-gray-900">{formatDate(selectedQr.lastAccessed)}</p>
-                      </div>
-                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {selectedQr.lastAccessed && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Last Viewed</label>
+                          <p className="mt-1 text-sm text-gray-900">{formatDate(selectedQr.lastAccessed)}</p>
+                        </div>
+                      )}
+                      {selectedQr.lastScanned && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Last Scanned</label>
+                          <p className="mt-1 text-sm text-blue-600">{formatDate(selectedQr.lastScanned)}</p>
+                        </div>
+                      )}
+                    </div>
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Generated Via</label>

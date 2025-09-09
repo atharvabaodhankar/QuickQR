@@ -5,80 +5,99 @@ const qrCodeSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    maxlength: 100
+    maxlength: 100,
   },
   data: {
     type: String,
     required: true,
-    maxlength: 2048 // URL length limit
+    maxlength: 2048, // URL length limit
   },
   qrCodeImage: {
     type: String,
-    required: true // base64 encoded image
+    required: true, // base64 encoded image
   },
   customization: {
     size: {
       type: Number,
       default: 200,
       min: 100,
-      max: 1000
+      max: 1000,
     },
     foregroundColor: {
       type: String,
-      default: '#000000',
-      match: /^#[0-9A-F]{6}$/i
+      default: "#000000",
+      match: /^#[0-9A-F]{6}$/i,
     },
     backgroundColor: {
       type: String,
-      default: '#FFFFFF',
-      match: /^#[0-9A-F]{6}$/i
+      default: "#FFFFFF",
+      match: /^#[0-9A-F]{6}$/i,
     },
     errorCorrectionLevel: {
       type: String,
-      enum: ['L', 'M', 'Q', 'H'],
-      default: 'M'
+      enum: ["L", "M", "Q", "H"],
+      default: "M",
     },
     margin: {
       type: Number,
       default: 4,
       min: 0,
-      max: 20
-    }
+      max: 20,
+    },
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true
+    required: true,
   },
   apiKeyId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "ApiKey",
-    required: false // Only set when generated via API key
+    required: false, // Only set when generated via API key
   },
   generatedVia: {
     type: String,
     enum: ["jwt", "apikey"],
-    required: true
+    required: true,
   },
   accessCount: {
     type: Number,
-    default: 0
+    default: 0,
+  },
+  scanCount: {
+    type: Number,
+    default: 0,
   },
   lastAccessed: {
     type: Date,
-    default: null
+    default: null,
   },
+  lastScanned: {
+    type: Date,
+    default: null,
+  },
+  scanHistory: [
+    {
+      timestamp: {
+        type: Date,
+        default: Date.now,
+      },
+      userAgent: String,
+      ipAddress: String,
+      referrer: String,
+    },
+  ],
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-qrCodeSchema.pre('save', function(next) {
+qrCodeSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
 });

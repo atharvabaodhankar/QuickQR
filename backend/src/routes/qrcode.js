@@ -9,6 +9,54 @@ import QrCodeModel from "../models/QrCode.js";
 
 const router = express.Router();
 
+// QR Code Scan Tracking Route (Public - no authentication required)
+router.get("/scan/:id", async (req, res) => {
+  try {
+    const qrCode = await QrCodeModel.findById(req.params.id);
+    
+    if (!qrCode) {
+      return res.status(404).json({ error: "QR Code not found" });
+    }
+
+    // Extract tracking information
+    const userAgent = req.get('User-Agent') || 'Unknown';
+    const ipAddress = req.ip || req.connection.remoteAddress || 'Unknown';
+    const referrer = req.get('Referrer') || 'Direct';
+
+    // Update scan statistics
+    qrCode.scanCount += 1;
+    qrCode.lastScanned = new Date();
+    
+    // Add to scan history (keep last 100 scans to prevent unlimited growth)
+    qrCode.scanHistory.push({
+      timestamp: new Date(),
+      userAgent,
+      ipAddress,
+      referrer
+    });
+    
+    // Keep only the last 100 scan records
+    if (qrCode.scanHistory.length > 100) {
+      qrCode.scanHistory = qrCode.scanHistory.slice(-100);
+    }
+
+    await qrCode.save();
+
+    // Redirect to the actual URL
+    res.redirect(qrCode.data);
+  } catch (err) {
+    console.error('Scan tracking error:', err);
+    // If there's an error, still try to redirect to a fallback
+    res.status(500).json({ error: "Tracking failed" });
+  }
+});
+
+// Helper function to generate tracking URL
+const generateTrackingUrl = (qrCodeId) => {
+  const baseUrl = process.env.BASE_URL || 'http://localhost:5000';
+  return `${baseUrl}/scan/${qrCodeId}`;
+};
+
 // Helper function to check for existing QR code (caching)
 const findExistingQrCode = async (data, userId, generatedVia) => {
   return await QrCodeModel.findOne({
@@ -54,6 +102,8 @@ router.get("/qrcode", apiKeyAuth, apiKeyRateLimit, async (req, res) => {
           url: existingQrCode.data,
           qrData: existingQrCode.qrCodeImage,
           accessCount: existingQrCode.accessCount,
+          scanCount: existingQrCode.scanCount,
+          lastScanned: existingQrCode.lastScanned,
           createdAt: existingQrCode.createdAt,
           cached: true,
         },
@@ -61,14 +111,11 @@ router.get("/qrcode", apiKeyAuth, apiKeyRateLimit, async (req, res) => {
       });
     }
 
-    // Generate new QR code
-    const qrData = await QRCode.toDataURL(url);
-
-    // Save to database
+    // Save to database first to get the ID
     const qrCode = new QrCodeModel({
       name: qrName,
       data: url,
-      qrCodeImage: qrData,
+      qrCodeImage: '', // Temporary empty string
       userId: userId,
       apiKeyId: req.apiKey._id,
       generatedVia: "apikey",
@@ -76,6 +123,14 @@ router.get("/qrcode", apiKeyAuth, apiKeyRateLimit, async (req, res) => {
       lastAccessed: new Date(),
     });
 
+    await qrCode.save();
+
+    // Generate QR code with tracking URL
+    const trackingUrl = generateTrackingUrl(qrCode._id);
+    const qrData = await QRCode.toDataURL(trackingUrl);
+
+    // Update with the actual QR code image
+    qrCode.qrCodeImage = qrData;
     await qrCode.save();
 
     res.status(201).json({
@@ -86,6 +141,8 @@ router.get("/qrcode", apiKeyAuth, apiKeyRateLimit, async (req, res) => {
         url: qrCode.data,
         qrData: qrCode.qrCodeImage,
         accessCount: qrCode.accessCount,
+        scanCount: qrCode.scanCount,
+        lastScanned: qrCode.lastScanned,
         createdAt: qrCode.createdAt,
         cached: false,
       },
@@ -127,14 +184,11 @@ router.post("/qrcode/generate", apiKeyAuth, apiKeyRateLimit, async (req, res) =>
       errorCorrectionLevel: customization.errorCorrectionLevel || "M",
     };
 
-    // Generate QR code with customization
-    const qrData = await QRCode.toDataURL(url, qrOptions);
-
-    // Save to database
+    // Save to database first to get the ID
     const qrCode = new QrCodeModel({
       name: qrName,
       data: url,
-      qrCodeImage: qrData,
+      qrCodeImage: '', // Temporary empty string
       userId: userId,
       apiKeyId: req.apiKey._id,
       generatedVia: "apikey",
@@ -151,6 +205,14 @@ router.post("/qrcode/generate", apiKeyAuth, apiKeyRateLimit, async (req, res) =>
 
     await qrCode.save();
 
+    // Generate QR code with tracking URL and customization
+    const trackingUrl = generateTrackingUrl(qrCode._id);
+    const qrData = await QRCode.toDataURL(trackingUrl, qrOptions);
+
+    // Update with the actual QR code image
+    qrCode.qrCodeImage = qrData;
+    await qrCode.save();
+
     res.status(201).json({
       message: "QR Code generated and saved",
       qrCode: {
@@ -160,6 +222,8 @@ router.post("/qrcode/generate", apiKeyAuth, apiKeyRateLimit, async (req, res) =>
         qrData: qrCode.qrCodeImage,
         customization: qrCode.customization,
         accessCount: qrCode.accessCount,
+        scanCount: qrCode.scanCount,
+        lastScanned: qrCode.lastScanned,
         createdAt: qrCode.createdAt,
         cached: false,
       },
@@ -205,14 +269,11 @@ router.post(
         errorCorrectionLevel: customization.errorCorrectionLevel || "M",
       };
 
-      // Generate QR code with customization
-      const qrData = await QRCode.toDataURL(url, qrOptions);
-
-      // Save to database
+      // Save to database first to get the ID
       const qrCode = new QrCodeModel({
         name: qrName,
         data: url,
-        qrCodeImage: qrData,
+        qrCodeImage: '', // Temporary empty string
         userId: userId,
         generatedVia: "jwt",
         customization: {
@@ -228,6 +289,14 @@ router.post(
 
       await qrCode.save();
 
+      // Generate QR code with tracking URL and customization
+      const trackingUrl = generateTrackingUrl(qrCode._id);
+      const qrData = await QRCode.toDataURL(trackingUrl, qrOptions);
+
+      // Update with the actual QR code image
+      qrCode.qrCodeImage = qrData;
+      await qrCode.save();
+
       res.status(201).json({
         message: "QR Code generated and saved",
         qrCode: {
@@ -237,6 +306,8 @@ router.post(
           qrData: qrCode.qrCodeImage,
           customization: qrCode.customization,
           accessCount: qrCode.accessCount,
+          scanCount: qrCode.scanCount,
+          lastScanned: qrCode.lastScanned,
           createdAt: qrCode.createdAt,
           cached: false,
         },
@@ -321,20 +392,25 @@ router.get("/qrcode/jwt", authMiddleware, jwtRateLimit, async (req, res) => {
     const qrName =
       name || `QR for ${url.substring(0, 50)}${url.length > 50 ? "..." : ""}`;
 
-    // Generate QR code with default options
-    const qrData = await QRCode.toDataURL(url);
-
-    // Save to database
+    // Save to database first to get the ID
     const qrCode = new QrCodeModel({
       name: qrName,
       data: url,
-      qrCodeImage: qrData,
+      qrCodeImage: '', // Temporary empty string
       userId: userId,
       generatedVia: "jwt",
       accessCount: 1,
       lastAccessed: new Date(),
     });
 
+    await qrCode.save();
+
+    // Generate QR code with tracking URL
+    const trackingUrl = generateTrackingUrl(qrCode._id);
+    const qrData = await QRCode.toDataURL(trackingUrl);
+
+    // Update with the actual QR code image
+    qrCode.qrCodeImage = qrData;
     await qrCode.save();
 
     res.status(201).json({
@@ -422,7 +498,10 @@ router.get("/qrcodes/:id", authMiddleware, async (req, res) => {
         qrData: qrCode.qrCodeImage,
         generatedVia: qrCode.generatedVia,
         accessCount: qrCode.accessCount,
+        scanCount: qrCode.scanCount,
         lastAccessed: qrCode.lastAccessed,
+        lastScanned: qrCode.lastScanned,
+        scanHistory: qrCode.scanHistory.slice(-10), // Last 10 scans for details
         createdAt: qrCode.createdAt,
         updatedAt: qrCode.updatedAt,
       },
@@ -470,8 +549,10 @@ router.get("/analytics/qrcodes", authMiddleware, async (req, res) => {
       totalQrCodes,
       recentQrCodes,
       totalAccesses,
+      totalScans,
       byGeneratedVia,
       topQrCodes,
+      topScannedQrCodes,
     ] = await Promise.all([
       QrCodeModel.countDocuments({ userId }),
       QrCodeModel.countDocuments({ userId, createdAt: { $gte: daysAgo } }),
@@ -481,12 +562,20 @@ router.get("/analytics/qrcodes", authMiddleware, async (req, res) => {
       ]),
       QrCodeModel.aggregate([
         { $match: { userId: userId } },
+        { $group: { _id: null, totalScans: { $sum: "$scanCount" } } },
+      ]),
+      QrCodeModel.aggregate([
+        { $match: { userId: userId } },
         { $group: { _id: "$generatedVia", count: { $sum: 1 } } },
       ]),
       QrCodeModel.find({ userId })
         .sort({ accessCount: -1 })
         .limit(5)
-        .select("name data accessCount createdAt"),
+        .select("name data accessCount scanCount createdAt"),
+      QrCodeModel.find({ userId })
+        .sort({ scanCount: -1 })
+        .limit(5)
+        .select("name data accessCount scanCount lastScanned createdAt"),
     ]);
 
     res.json({
@@ -494,8 +583,10 @@ router.get("/analytics/qrcodes", authMiddleware, async (req, res) => {
         totalQrCodes,
         recentQrCodes: recentQrCodes,
         totalAccesses: totalAccesses[0]?.totalAccesses || 0,
+        totalScans: totalScans[0]?.totalScans || 0,
         generationMethods: byGeneratedVia,
         topQrCodes,
+        topScannedQrCodes,
         period: `Last ${days} days`,
       },
     });

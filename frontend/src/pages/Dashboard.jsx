@@ -65,25 +65,25 @@ const Dashboard = () => {
       change: `+${analytics?.recentQrCodes || 0} this month`
     },
     {
-      name: 'Total Scans',
+      name: 'Total Views',
       value: analytics?.totalAccesses || 0,
       icon: Eye,
       color: 'bg-green-500',
-      change: 'All time'
+      change: 'All time views'
+    },
+    {
+      name: 'Total Scans',
+      value: analytics?.totalScans || 0,
+      icon: Activity,
+      color: 'bg-purple-500',
+      change: 'Real QR scans'
     },
     {
       name: 'This Month',
       value: analytics?.recentQrCodes || 0,
       icon: TrendingUp,
-      color: 'bg-purple-500',
-      change: 'New QR codes'
-    },
-    {
-      name: 'Top Performer',
-      value: analytics?.topQrCodes?.[0]?.accessCount || 0,
-      icon: Activity,
       color: 'bg-orange-500',
-      change: 'Most scanned'
+      change: 'New QR codes'
     }
   ];
 
@@ -241,6 +241,12 @@ const Dashboard = () => {
                           <div className="flex items-center">
                             <Eye className="h-4 w-4 mr-1" />
                             {qr.accessCount}
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          <div className="flex items-center">
+                            <QrCode className="h-4 w-4 mr-1" />
+                            {qr.scanCount || 0}
                           </div>
                         </div>
                         <div className="text-sm text-gray-500">

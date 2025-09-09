@@ -57,25 +57,25 @@ const Analytics = () => {
       change: `+${analytics?.recentQrCodes || 0} in ${timeRange} days`
     },
     {
-      name: 'Total Scans',
+      name: 'Total Views',
       value: analytics?.totalAccesses || 0,
       icon: Eye,
       color: 'bg-green-500',
-      change: 'All time'
+      change: 'App views'
+    },
+    {
+      name: 'Total Scans',
+      value: analytics?.totalScans || 0,
+      icon: Activity,
+      color: 'bg-purple-500',
+      change: 'Real QR scans'
     },
     {
       name: 'Recent Activity',
       value: analytics?.recentQrCodes || 0,
       icon: TrendingUp,
-      color: 'bg-purple-500',
-      change: `Last ${timeRange} days`
-    },
-    {
-      name: 'Top Performer',
-      value: analytics?.topQrCodes?.[0]?.accessCount || 0,
-      icon: Activity,
       color: 'bg-orange-500',
-      change: 'Most scanned'
+      change: `Last ${timeRange} days`
     }
   ];
 
@@ -140,7 +140,7 @@ const Analytics = () => {
           })}
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
           {/* Generation Methods Chart */}
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center mb-6">
@@ -189,11 +189,11 @@ const Analytics = () => {
             )}
           </div>
 
-          {/* Top Performing QR Codes */}
+          {/* Top Viewed QR Codes */}
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center mb-6">
-              <TrendingUp className="h-5 w-5 text-green-600 mr-2" />
-              <h2 className="text-lg font-semibold text-gray-900">Top Performing QR Codes</h2>
+              <Eye className="h-5 w-5 text-green-600 mr-2" />
+              <h2 className="text-lg font-semibold text-gray-900">Most Viewed QR Codes</h2>
             </div>
             
             {topQrCodes.length > 0 ? (
@@ -201,8 +201,8 @@ const Analytics = () => {
                 {topQrCodes.map((qr, index) => (
                   <div key={qr._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center">
-                      <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-blue-600">
+                      <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <span className="text-sm font-medium text-green-600">
                           {index + 1}
                         </span>
                       </div>
@@ -215,10 +215,66 @@ const Analytics = () => {
                         </p>
                       </div>
                     </div>
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-1">
+                        <Eye className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {qr.accessCount}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <QrCode className="h-4 w-4 text-blue-400" />
+                        <span className="text-sm font-medium text-blue-600">
+                          {qr.scanCount || 0}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Eye className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                <p className="text-gray-500">No QR codes yet</p>
+              </div>
+            )}
+          </div>
+
+          {/* Most Scanned QR Codes */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center mb-6">
+              <TrendingUp className="h-5 w-5 text-purple-600 mr-2" />
+              <h2 className="text-lg font-semibold text-gray-900">Most Scanned QR Codes</h2>
+            </div>
+            
+            {analytics?.topScannedQrCodes?.length > 0 ? (
+              <div className="space-y-4">
+                {analytics.topScannedQrCodes.map((qr, index) => (
+                  <div key={qr._id} className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                        <span className="text-sm font-medium text-purple-600">
+                          {index + 1}
+                        </span>
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm font-medium text-gray-900 truncate max-w-xs">
+                          {qr.name}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate max-w-xs">
+                          {qr.data}
+                        </p>
+                        {qr.lastScanned && (
+                          <p className="text-xs text-purple-600">
+                            Last scanned: {formatDate(qr.lastScanned)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                     <div className="flex items-center space-x-2">
-                      <Eye className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm font-medium text-gray-900">
-                        {qr.accessCount}
+                      <QrCode className="h-4 w-4 text-purple-400" />
+                      <span className="text-sm font-medium text-purple-600">
+                        {qr.scanCount || 0}
                       </span>
                     </div>
                   </div>
@@ -227,7 +283,10 @@ const Analytics = () => {
             ) : (
               <div className="text-center py-8">
                 <TrendingUp className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                <p className="text-gray-500">No QR codes yet</p>
+                <p className="text-gray-500">No scans yet</p>
+                <p className="text-xs text-gray-400 mt-2">
+                  QR codes need to be scanned with a phone to appear here
+                </p>
               </div>
             )}
           </div>
@@ -247,7 +306,7 @@ const Analytics = () => {
                   Math.round((analytics?.totalAccesses || 0) / analytics?.totalQrCodes) : 0
                 }
               </div>
-              <div className="text-sm text-gray-600">Average scans per QR code</div>
+              <div className="text-sm text-gray-600">Average views per QR code</div>
             </div>
             
             <div className="text-center p-4 bg-green-50 rounded-lg">
@@ -259,9 +318,11 @@ const Analytics = () => {
             
             <div className="text-center p-4 bg-purple-50 rounded-lg">
               <div className="text-2xl font-bold text-purple-600 mb-2">
-                {topQrCodes.length > 0 ? topQrCodes[0].accessCount : 0}
+                {analytics?.totalQrCodes > 0 ? 
+                  Math.round((analytics?.totalScans || 0) / analytics?.totalQrCodes) : 0
+                }
               </div>
-              <div className="text-sm text-gray-600">Highest scan count</div>
+              <div className="text-sm text-gray-600">Average scans per QR code</div>
             </div>
           </div>
         </div>
@@ -277,7 +338,7 @@ const Analytics = () => {
                   {analytics.totalQrCodes} QR codes generated
                 </p>
                 <p className="text-blue-100">
-                  with {analytics.totalAccesses} total scans
+                  with {analytics.totalAccesses} views and {analytics.totalScans} real scans
                 </p>
               </div>
               <div>
